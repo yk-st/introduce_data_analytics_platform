@@ -1,0 +1,58 @@
+version: '3'
+services:
+  #　メタデータ保存用Mysql
+  mysql:
+    platform: linux/x86_64
+    image: mysql:5.7
+    volumes:
+      - ./data/mysql/data:/var/lib/mysql
+      - ./files/hiveddls:/docker-entrypoint-initdb.d
+      - ./files/share/my.cnf:/etc/mysql/conf.d/my.cnf
+    restart: always
+    environment:
+      MYSQL_DATABASE: metastore
+      MYSQL_ROOT_PASSWORD: root
+    container_name: db_mysql_mlops
+    networks:
+      - app-net-big
+  # ストリーミング
+  kafka:
+    build: ./files/kafka
+    command: sh /etc/rc.local/start_up.sh
+    container_name: kafka_mlops
+    networks:
+      - app-net-big
+  # ワーキングコンテナ
+  workspace:
+    build: ./files
+    command: sleep infinity
+    depends_on:
+      - mysql
+    container_name: pyspark_mlops
+    networks:
+      - app-net-big
+  # ストリーミング
+  nodejs:
+    build: ./files/nodejs
+    command: node /usr/src/app/express.js
+    container_name: nodejs_mlops
+    ports:
+      - 3001:3001
+    networks:
+      - app-net-big
+  mongo:
+    build: ./files/mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: ZQpassowrd
+      MONGO_INITDB_DATABASE: user_prediction
+    ports:
+      - 27017:27017
+    networks:
+      - app-net-big
+    container_name: mongo_data_mlops
+
+networks:
+  app-net-big:
+    driver: bridge
