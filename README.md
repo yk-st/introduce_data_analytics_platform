@@ -23,6 +23,11 @@
 # demo1
 ユーザのアクセス状況に応じて、モデルを作成しWebページの表示を変化させるデモです。
 
+## アクセス情報
+
+BIツール: http://localhost:3000
+MongoDB: ID: action pws: pass123 db: user_prediction
+
 # demo2
 データ分析基盤で一般的に行われるバッチとストリーミングの処理を行ってみるデモです。
 
